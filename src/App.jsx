@@ -5,6 +5,7 @@ import { Paginacion } from "./components/Paginacion"; // Asegúrate de tener est
 import Table from "react-bootstrap/Table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import Spinner from "react-bootstrap/Spinner";
 import { FiltroMagnitud } from "./components/FiltroMagnitud";
 
 export const App = () => {
@@ -14,6 +15,13 @@ export const App = () => {
   const [paginaActual, setPaginaActual] = useState(1);
   const [sismosPorPagina] = useState(10);
   const [filtroMagnitud, setFiltroMagnitud] = useState("mayor");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   useEffect(() => {
     let sortedSismos = [...sismos];
@@ -65,36 +73,47 @@ export const App = () => {
       </div>
 
       <Api setSismos={setSismos} />
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th></th>
-            <th className="bg-dark text-white">Fecha Local</th>
-            <th className="bg-dark text-white">Lugar</th>
-            <th className="bg-dark text-white">Profundidad (km)</th>
-            <th className="bg-dark text-white">Magnitud</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sismosActuales.map((sismo) => (
-            <tr key={sismo.id}>
-              <td className="text-danger text-center">
-                <FontAwesomeIcon icon={faTriangleExclamation} />
-              </td>
-              <td>{new Date(sismo.properties.time).toLocaleString()}</td>
-              <td>{sismo.properties.place}</td>
-              <td>{sismo.geometry.coordinates[2]}</td>
-              <td>{sismo.properties.mag}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <Paginacion
-        sismosTotales={sismosFiltrados.length}
-        sismosPorPagina={sismosPorPagina}
-        paginar={paginar}
-        paginaActual={paginaActual}
-      />
+      {loading && (
+        <div className="text-center">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </Spinner>
+        </div>
+      )}
+      {!loading && (
+        <div>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th></th>
+                <th className="bg-dark text-white">Fecha Local</th>
+                <th className="bg-dark text-white">Lugar</th>
+                <th className="bg-dark text-white">Profundidad (km)</th>
+                <th className="bg-dark text-white">Magnitud</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sismosActuales.map((sismo) => (
+                <tr key={sismo.id}>
+                  <td className="text-danger text-center">
+                    <FontAwesomeIcon icon={faTriangleExclamation} />
+                  </td>
+                  <td>{new Date(sismo.properties.time).toLocaleString()}</td>
+                  <td>{sismo.properties.place}</td>
+                  <td>{sismo.geometry.coordinates[2]}</td>
+                  <td>{sismo.properties.mag}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Paginacion
+            sismosTotales={sismosFiltrados.length}
+            sismosPorPagina={sismosPorPagina}
+            paginar={paginar}
+            paginaActual={paginaActual}
+          />
+        </div>
+      )}
     </div>
   );
 };
